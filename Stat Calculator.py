@@ -1,20 +1,8 @@
 import numpy as np 
 import pandas as pd
 
-from requests import get
-from bs4 import BeautifulSoup as bs
-
-soup = bs(get('https://www.fangraphs.com/guts.aspx?type=cn').content,'html.parser')
-
-trs = soup.find_all('tr')[15].find_all('tr')
-
-cols = [i.string for i in trs[0].find_all('th')]
-data = [i.find_all('td') for i in trs[1:]]
-
-weights = pd.DataFrame({cols[ind]:[float(i[ind].string) for i in data] for ind in range(14)})
-weights['Season'] = [int(i) for i in weights['Season']]
-weights = weights.set_index('Season')
-
+# Reads data for the 2020 wOBA weights
+yd = pd.read_csv('2020 wOBA Weights.csv').set_index('Stat')['2020']
 valid_events=['catcher_interf','double', 'double_play', 'field_error',
        'field_out', 'fielders_choice', 'fielders_choice_out', 'force_out',
        'grounded_into_double_play', 'single', 'sac_fly', 'hit_by_pitch', 'walk',
@@ -34,10 +22,9 @@ def dissect_events(lst):
     ret_dict['AB'] = len([i for i in lst if i in [j for j in valid_events if j not in ['walk','sac_fly','sac_bunt','hit_by_pitch']]])
     return ret_dict
 
-def wOBA_calculator(lst,year=2020):
+def wOBA_calculator(lst):
     '''insert a list of events and get an approximate wOBA value'''
     lst = dissect_events(lst)
-    yd=weights.loc[year]
     return ((yd['wBB']*lst['walk'])+
     (yd['wHBP']*lst['hit_by_pitch'])+(yd['w1B']*lst['single'])+
     (yd['w2B']*lst['double'])+(yd['w3B']*lst['triple'])+(yd['wHR']*lst['home_run']))/(lst['PA'])

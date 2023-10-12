@@ -30,4 +30,5 @@ def wOBA_calculator(lst):
     (yd['w2B']*lst['double'])+(yd['w3B']*lst['triple'])+(yd['wHR']*lst['home_run']))/(lst['PA'])
 
 def OPS_calculator(lst):
+       lst = dissect_events(lst)
     return (sum([lst[i] for i in ['single','double','triple','home_run','hit_by_pitch','walk']])/lst['PA'])+((lst['single']+(2*lst['double'])+(3*lst['triple'])+(4*lst['home_run']))/lst['AB'])
